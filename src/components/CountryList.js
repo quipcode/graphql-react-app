@@ -1,49 +1,40 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { GET_COUNTRIES } from '../queries';
+import React, { useState } from 'react';
+import { ApolloClient, InMemoryCache, useQuery, gql } from '@apollo/client';
 
-function CountryList() {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [users, setUsers] = useState([]);
+// initialize a GraphQL client
+const client = new ApolloClient({
+  cache: new InMemoryCache(),
+  uri: 'https://countries.trevorblades.com'
+});
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.post('https://countries.trevorblades.com/', {
-          query: GET_COUNTRIES,
-        });
+// write a GraphQL query that asks for names and codes for all countries
+const LIST_COUNTRIES = gql`
+  {
+    countries {
+      name
+      code
+    }
+  }
+`;
 
-        if (response.data.errors) {
-          throw new Error(response.data.errors[0].message);
-        }
+// create a component that renders a select input for coutries
+function CountrySelect() {
+  const [country, setCountry] = useState('US');
+  const {data, loading, error} = useQuery(LIST_COUNTRIES, {client});
 
-        setUsers(response.data.data.countries);
-        setLoading(false);
-      } catch (error) {
-        setError(error.message);
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (loading || error) {
+    return <p>{error ? error.message : 'Loading...'}</p>;
+  }
 
   return (
-    <div>
-      <h2>Country List</h2>
-      <ul>
-        {users.map(user => (
-          <li key={user.code}>
-            {user.code} - {user.name}
-          </li>
-        ))}
-      </ul>
-    </div>
+    <select value={country} onChange={event => setCountry(event.target.value)}>
+      {data.countries.map(country => (
+        <option key={country.code} value={country.code}>
+          {country.name}
+        </option>
+      ))}
+    </select>
   );
 }
 
-export default CountryList;
+export default CountrySelect;

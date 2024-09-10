@@ -1,3 +1,10 @@
+learning graphql following sample react app found here: https://github.com/trevorblades/countries
+
+url endpoint is: https://countries.trevorblades.com/
+
+found using this list of graphql endpoints: https://github.com/graphql-kit/graphql-apis
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
